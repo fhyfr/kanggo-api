@@ -1,6 +1,5 @@
 const errorHandler = require('../../exceptions/ErrorHandler');
 
-
 class UsersHandler {
   constructor(service, validator) {
     this.service = service;

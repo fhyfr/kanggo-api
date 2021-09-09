@@ -1,7 +1,8 @@
 const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const InvariantError = require('../../exceptions/InvariantError');
-const pool = require('./db_config');
+const AuthenticationsError = require('../../exceptions/AuthenticationError');
+const pool = require('./DatabaseConfig');
 
 class UsersService {
   constructor() {
@@ -14,22 +15,40 @@ class UsersService {
     const id = `user-${nanoid(16)}`;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const sql = 'INSERT INTO users VALUES ?';
-    const values = [id, name, email, hashedPassword];
+    const sql = 'INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)';
 
-    console.log(values);
+    const result = await this.pool.query(sql, [id, name, email, hashedPassword]);
 
-    const result = await this.pool.execute(sql, [values]);
+    if (result.affectedRows === 0) {
+      throw new InvariantError('Gagal menambahkan user');
+    }
 
-    console.log(result);
+    return id;
   }
 
   async verifyEmail(email) {
-    const result = await this.pool.execute('SELECT email FROM `users` WHERE `email` = ? ', [email]);
+    const [rows] = await this.pool.query('SELECT email FROM users WHERE email = ? ', [email]);
 
-    if (result.rows.length > 0) {
+    if (rows.length > 0) {
       throw new InvariantError('Gagal menambahkan user. Email sudah digunakan.');
     }
+  }
+
+  async verifyUserCredential(email, password) {
+    const [rows] = await this.pool.query('SELECT id, password FROM users WHERE email = ? ', [email]);
+
+    if (!rows.length) {
+      throw new AuthenticationsError('Kredensial yang Anda berikan salah');
+    }
+
+    const { id, password: hashedPassword } = rows[0];
+    const match = await bcrypt.compare(password, hashedPassword);
+
+    if (!match) {
+      throw new AuthenticationsError('Kredensial yang Anda berikan salah');
+    }
+
+    return id;
   }
 }
 
