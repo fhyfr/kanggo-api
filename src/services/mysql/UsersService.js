@@ -19,7 +19,7 @@ class UsersService {
 
     const result = await this.pool.query(sql, [id, name, email, hashedPassword]);
 
-    if (result.affectedRows === 0) {
+    if (result[0].affectedRows === 0) {
       throw new InvariantError('Gagal menambahkan user');
     }
 

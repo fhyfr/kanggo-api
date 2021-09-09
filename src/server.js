@@ -15,10 +15,16 @@ const TokenManager = require('./tokenize/TokenManager');
 const AuthenticationsValidator = require('./validator/authentications');
 const AuthenticationsService = require('./services/mysql/AuthenticationsService');
 
+// products
+const products = require('./api/products');
+const ProductsService = require('./services/mysql/ProductsService');
+const ProductsValidator = require('./validator/products');
+
 // init server
 const init = async () => {
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
+  const productsService = new ProductsService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -71,6 +77,13 @@ const init = async () => {
         usersService,
         tokenManager: TokenManager,
         validator: AuthenticationsValidator,
+      },
+    },
+    {
+      plugin: products,
+      options: {
+        service: productsService,
+        validator: ProductsValidator,
       },
     },
   ]);
