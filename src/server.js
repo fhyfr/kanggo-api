@@ -20,11 +20,17 @@ const products = require('./api/products');
 const ProductsService = require('./services/mysql/ProductsService');
 const ProductsValidator = require('./validator/products');
 
+// orders
+const orders = require('./api/orders');
+const OrdersService = require('./services/mysql/OrdersService');
+const OrdersValidator = require('./validator/orders');
+
 // init server
 const init = async () => {
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   const productsService = new ProductsService();
+  const ordersService = new OrdersService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -84,6 +90,13 @@ const init = async () => {
       options: {
         service: productsService,
         validator: ProductsValidator,
+      },
+    },
+    {
+      plugin: orders,
+      options: {
+        service: ordersService,
+        validator: OrdersValidator,
       },
     },
   ]);
