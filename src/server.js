@@ -101,6 +101,18 @@ const init = async () => {
     },
   ]);
 
+  // main page
+  await server.route({
+    method: 'GET',
+    path: '/',
+    handler: (request, h) => {
+        return {
+          status: 'OK',
+          message: 'Server Up',
+        };
+    }
+  });
+
   await server.start();
   // eslint-disable-next-line no-console
   console.log(`Server berjalan pada ${server.info.uri}`);
