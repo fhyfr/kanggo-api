@@ -25,12 +25,18 @@ const orders = require('./api/orders');
 const OrdersService = require('./services/mysql/OrdersService');
 const OrdersValidator = require('./validator/orders');
 
+// payments
+const payments = require('./api/payments');
+const PaymentsService = require('./services/mysql/PaymentsService');
+const PaymentsValidator = require('./validator/payments');
+
 // init server
 const init = async () => {
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   const productsService = new ProductsService();
   const ordersService = new OrdersService();
+  const paymentsService = new PaymentsService();
 
   const server = Hapi.server({
     port: process.env.PORT || 3000,
@@ -99,18 +105,23 @@ const init = async () => {
         validator: OrdersValidator,
       },
     },
+    {
+      plugin: payments,
+      options: {
+        service: paymentsService,
+        validator: PaymentsValidator,
+      },
+    },
   ]);
 
   // main page
-  await server.route({
+  server.route({
     method: 'GET',
     path: '/',
-    handler: (request, h) => {
-        return {
-          status: 'OK',
-          message: 'Server Up',
-        };
-    }
+    handler: () => ({
+      status: 'OK',
+      message: 'Server Up',
+    }),
   });
 
   await server.start();
